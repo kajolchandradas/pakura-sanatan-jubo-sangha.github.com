@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "Admin": {
+      "title": "Admin",
+      "description": "System administrator with elevated governance privileges",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID of administrator" },
+        "email": { "type": "string", "format": "email", "description": "Admin email address" },
+        "displayName": { "type": "string", "maxLength": 100, "description": "Full display name" },
+        "isMainAdmin": { "type": "boolean", "description": "Super admin flag" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Authenticated user profile for members and management",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "firebaseUid": { "type": "string", "maxLength": 128 },
+        "username": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string", "maxLength": 100 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["admin", "president", "treasurer", "secretary", "member"] },
+        "memberSystemId": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["active", "inactive", "pending"] },
+        "approvedBy": { "type": "string", "maxLength": 128 },
+        "approvedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isMainAdmin": { "type": "boolean" }
+      },
+      "required": ["userId", "displayName", "role", "status", "createdAt"]
+    },
+    "Member": {
+      "title": "Member",
+      "description": "Official association member record",
+      "type": "object",
+      "properties": {
+        "systemId": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "currentBalance": { "type": "number" },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["systemId", "name", "phone", "status", "currentBalance", "createdAt"]
+    },
+    "Contribution": {
+      "title": "Contribution",
+      "description": "Monthly savings contribution record",
+      "type": "object",
+      "properties": {
+        "contributionId": { "type": "string", "maxLength": 64 },
+        "memberSystemId": { "type": "string", "maxLength": 64 },
+        "memberName": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "contributionDate": { "type": "string", "maxLength": 20 },
+        "month": { "type": "string", "maxLength": 20 },
+        "paymentMethod": { "type": "string", "enum": ["cash", "bank"] },
+        "receiptId": { "type": "string", "maxLength": 64 },
+        "recordedBy": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["paid", "pending"] },
+        "lateFee": { "type": "number" }
+      },
+      "required": ["contributionId", "memberSystemId", "amount", "contributionDate", "month", "status"]
+    },
+    "Loan": {
+      "title": "Loan",
+      "description": "Loan disbursement record",
+      "type": "object",
+      "properties": {
+        "loanId": { "type": "string", "maxLength": 64 },
+        "borrowerId": { "type": "string", "maxLength": 64 },
+        "borrowerName": { "type": "string", "maxLength": 100 },
+        "borrowerPhone": { "type": "string", "maxLength": 20 },
+        "principal": { "type": "number" },
+        "loanDate": { "type": "string", "maxLength": 20 },
+        "rate": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "paid"] },
+        "remainingPrincipal": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["loanId", "borrowerName", "principal", "loanDate", "rate", "status"]
+    },
+    "LoanPayment": {
+      "title": "LoanPayment",
+      "description": "Loan repayment installment",
+      "type": "object",
+      "properties": {
+        "paymentId": { "type": "string", "maxLength": 64 },
+        "loanId": { "type": "string", "maxLength": 64 },
+        "borrowerName": { "type": "string", "maxLength": 100 },
+        "paymentDate": { "type": "string", "maxLength": 20 },
+        "amount": { "type": "number" },
+        "profitPaid": { "type": "number" },
+        "principalPaid": { "type": "number" },
+        "receiptId": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["paymentId", "loanId", "borrowerName", "amount", "paymentDate"]
+    },
+    "MemberWithdrawal": {
+      "title": "MemberWithdrawal",
+      "description": "Member fund withdrawal transaction",
+      "type": "object",
+      "properties": {
+        "withdrawalId": { "type": "string", "maxLength": 64 },
+        "memberSystemId": { "type": "string", "maxLength": 64 },
+        "memberName": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "maxLength": 20 },
+        "receiptId": { "type": "string", "maxLength": 64 },
+        "reason": { "type": "string", "maxLength": 255 },
+        "status": { "type": "string", "enum": ["completed", "pending"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["withdrawalId", "memberSystemId", "amount", "date", "status"]
+    },
+    "Receipt": {
+      "title": "Receipt",
+      "description": "Official transaction receipt record",
+      "type": "object",
+      "properties": {
+        "receiptId": { "type": "string", "maxLength": 64 },
+        "transactionId": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "amount": { "type": "number" },
+        "purpose": { "type": "string", "maxLength": 255 },
+        "date": { "type": "string", "maxLength": 20 },
+        "receivedBy": { "type": "string", "maxLength": 100 },
+        "memberSystemId": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["receiptId", "amount", "date", "purpose"]
+    },
+    "SocietyRule": {
+      "title": "SocietyRule",
+      "description": "Constitutional regulation or assembly resolution",
+      "type": "object",
+      "properties": {
+        "ruleId": { "type": "string", "maxLength": 64 },
+        "meetingDate": { "type": "string", "maxLength": 20 },
+        "title": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "enum": ["general", "savings", "loan", "meeting", "discipline", "welfare"] },
+        "decisionDetails": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "addedBy": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ruleId", "title", "category", "decisionDetails", "status"]
+    },
+    "GeneralMeeting": {
+      "title": "GeneralMeeting",
+      "description": "General meeting agenda and verified attendance log",
+      "type": "object",
+      "properties": {
+        "meetingId": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 200 },
+        "meetingDate": { "type": "string", "maxLength": 20 },
+        "scheduledTime": { "type": "string", "maxLength": 50 },
+        "location": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "attendanceRecorded": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["meetingId", "title", "meetingDate", "status"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Audit log item for security and operations",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string", "maxLength": 64 },
+        "dateTime": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userDisplayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "maxLength": 50 },
+        "action": { "type": "string", "maxLength": 100 },
+        "module": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 }
+      },
+      "required": ["logId", "dateTime", "userId", "action", "module", "description"]
+    },
+    "Income": {
+      "title": "Income",
+      "description": "Association income record",
+      "type": "object",
+      "properties": {
+        "incomeId": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 20 },
+        "category": { "type": "string", "maxLength": 50 },
+        "amount": { "type": "number" },
+        "description": { "type": "string", "maxLength": 255 },
+        "paymentMethod": { "type": "string", "enum": ["cash", "bank"] }
+      },
+      "required": ["incomeId", "date", "category", "amount"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Association expense record",
+      "type": "object",
+      "properties": {
+        "expenseId": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 20 },
+        "category": { "type": "string", "maxLength": 50 },
+        "amount": { "type": "number" },
+        "description": { "type": "string", "maxLength": 255 },
+        "paymentMethod": { "type": "string", "enum": ["cash", "bank"] }
+      },
+      "required": ["expenseId", "date", "category", "amount"]
+    },
+    "ProfitDistribution": {
+      "title": "ProfitDistribution",
+      "description": "Loan profit distribution to members",
+      "type": "object",
+      "properties": {
+        "distributionId": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 20 },
+        "totalAllocatedAmount": { "type": "number" },
+        "memberCount": { "type": "number" },
+        "amountPerMember": { "type": "number" },
+        "periodLabel": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["distributionId", "date", "totalAllocatedAmount", "memberCount"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Verified administrators collection for security rule checks"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles for authenticated members and administrators"
+    },
+    "/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Association members registry and savings balances"
+    },
+    "/contributions/{contributionId}": {
+      "schema": { "$ref": "#/entities/Contribution" },
+      "description": "Monthly savings installments"
+    },
+    "/loans/{loanId}": {
+      "schema": { "$ref": "#/entities/Loan" },
+      "description": "Loan records and schedules"
+    },
+    "/loan_payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/LoanPayment" },
+      "description": "Loan repayment records"
+    },
+    "/member_withdrawals/{withdrawalId}": {
+      "schema": { "$ref": "#/entities/MemberWithdrawal" },
+      "description": "Approved member fund withdrawals"
+    },
+    "/receipts/{receiptId}": {
+      "schema": { "$ref": "#/entities/Receipt" },
+      "description": "Digital transaction vouchers and receipts"
+    },
+    "/rules/{ruleId}": {
+      "schema": { "$ref": "#/entities/SocietyRule" },
+      "description": "Society regulations and policies"
+    },
+    "/meetings/{meetingId}": {
+      "schema": { "$ref": "#/entities/GeneralMeeting" },
+      "description": "General assemblies and meetings"
+    },
+    "/activity_logs/{logId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "Tamper-evident activity audit logs"
+    },
+    "/incomes/{incomeId}": {
+      "schema": { "$ref": "#/entities/Income" },
+      "description": "Income records collection"
+    },
+    "/expenses/{expenseId}": {
+      "schema": { "$ref": "#/entities/Expense" },
+      "description": "Expense records collection"
+    },
+    "/profit_distributions/{distributionId}": {
+      "schema": { "$ref": "#/entities/ProfitDistribution" },
+      "description": "Profit distribution records"
+    }
+  }
+}

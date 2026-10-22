@@ -1,0 +1,6 @@
+{
+  "name": "পাকুড়া সনাতন যুব সংঘ - Finance & Management",
+  "description": "পাকুড়া সনাতন যুব সংঘের আর্থিক হিসাব, মাসিক সঞ্চয়, ঋণ, সদস্য ও লেজার ব্যবস্থাপনা সিস্টেম।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

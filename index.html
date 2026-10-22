@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>পাকুড়া সনাতন যুব সংঘ - Finance & Management</title>
+    <meta name="description" content="পাকুড়া সনাতন যুব সংঘের আর্থিক হিসাব, মাসিক সঞ্চয়, ঋণ, সদস্য ও লেজার ব্যবস্থাপনা সিস্টেম।" />
+    <meta property="og:title" content="পাকুড়া সনাতন যুব সংঘ - Finance & Management" />
+    <meta property="og:description" content="পাকুড়া সনাতন যুব সংঘের আর্থিক হিসাব, মাসিক সঞ্চয়, ঋণ, সদস্য ও লেজার ব্যবস্থাপনা সিস্টেম।" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Early protection against Firebase Auth SDK internal assertion crashes in iframe / popup flows
+      window.addEventListener('error', function(event) {
+        var msg = String(event && (event.message || (event.error && event.error.message)) || '');
+        var filename = String(event && event.filename || '');
+        if (
+          msg.indexOf('Pending promise was never set') !== -1 ||
+          msg.indexOf('cancelled-popup-request') !== -1 ||
+          msg.indexOf('popup-blocked') !== -1 ||
+          msg.indexOf('popup-closed-by-user') !== -1 ||
+          (msg.indexOf("Cannot read properties of null (reading 'style')") !== -1 && (filename.indexOf('recaptcha') !== -1 || filename.indexOf('gstatic') !== -1 || !filename)) ||
+          msg.indexOf('recaptcha') !== -1
+        ) {
+          event.preventDefault();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          console.warn('[Handled Notice]', msg);
+          return true;
+        }
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = String(event && (event.reason && (event.reason.message || event.reason)) || '');
+        if (
+          reason.indexOf('Pending promise was never set') !== -1 ||
+          reason.indexOf('cancelled-popup-request') !== -1 ||
+          reason.indexOf('popup-blocked') !== -1 ||
+          reason.indexOf('popup-closed-by-user') !== -1 ||
+          reason.indexOf("Cannot read properties of null (reading 'style')") !== -1
+        ) {
+          event.preventDefault();
+          console.warn('[Handled Rejection]', reason);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Permanent invisible container for Firebase Phone Auth reCAPTCHA -->
+    <div id="recaptcha-container"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

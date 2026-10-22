@@ -1,0 +1,205 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all unlisted paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helper Functions ---
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isMainAdminEmail() {
+      return isSignedIn() && request.auth.token.email == 'freelancerkajolchandradas@gmail.com';
+    }
+
+    // Check admin privilege: verified main admin email or document in admins collection
+    function isAdmin() {
+      return isSignedIn() && (
+        isMainAdminEmail() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // --- Entity Validation Helpers ---
+    function isValidUser(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.role in ['admin', 'president', 'treasurer', 'secretary', 'member'] &&
+             data.status in ['active', 'inactive', 'pending'] &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 30)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 120));
+    }
+
+    function isValidMember(data) {
+      return data.systemId is string && data.systemId.size() <= 64 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.status in ['active', 'inactive'] &&
+             data.currentBalance is number;
+    }
+
+    function isValidContribution(data) {
+      return data.contributionId is string && data.contributionId.size() <= 64 &&
+             data.memberSystemId is string && data.memberSystemId.size() <= 64 &&
+             data.amount is number && data.amount > 0 &&
+             data.month is string && data.month.size() <= 20;
+    }
+
+    function isValidReceipt(data) {
+      return data.receiptId is string && data.receiptId.size() <= 64 &&
+             data.amount is number && data.amount > 0 &&
+             data.date is string && data.date.size() <= 20 &&
+             data.purpose is string && data.purpose.size() <= 255;
+    }
+
+    function isValidWithdrawal(data) {
+      return data.withdrawalId is string && data.withdrawalId.size() <= 64 &&
+             data.memberSystemId is string && data.memberSystemId.size() <= 64 &&
+             data.amount is number && data.amount > 0 &&
+             data.date is string && data.date.size() <= 20;
+    }
+
+    function isValidLog(data) {
+      return data.logId is string && data.logId.size() <= 64 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.action is string && data.action.size() <= 100 &&
+             data.module is string && data.module.size() <= 100;
+    }
+
+    // 1. Admins Registry: only Super Admin can write; signed-in users can check status
+    match /admins/{adminId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if isMainAdminEmail();
+    }
+
+    // 2. User Profiles: users own their profiles; members can register their own profile; admins can manage roles and status
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if isAdmin();
+
+      // Create: Members can self-register their member profile; authenticated users can register their profile; admins can create
+      allow create: if (
+        (isValidId(userId) && incoming().role == 'member' && isValidUser(incoming())) ||
+        (isOwner(userId) && isValidId(userId) && (incoming().role == 'member' || isMainAdminEmail())) ||
+        isAdmin()
+      );
+
+      // Update: Users can update personal information; Admins can update roles/approval; members can sync their profile
+      allow update: if (
+        isOwner(userId) ||
+        isAdmin() ||
+        (isValidId(userId) && incoming().role == 'member' && isValidUser(incoming()))
+      );
+
+      // Delete: Admins can delete any user; member role profiles can be reset/deleted for fresh registration
+      allow delete: if isAdmin() || (isValidId(userId) && existing().role == 'member');
+    }
+
+    // 3. Members Registry: Association members
+    match /members/{memberId} {
+      allow get, list: if true;
+      allow create, update: if (isAdmin() || (isValidId(memberId) && isValidMember(incoming())));
+      allow delete: if isAdmin();
+    }
+
+    // 4. Monthly Contributions: Financial transactions
+    match /contributions/{contributionId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(contributionId) && isValidContribution(incoming());
+      allow delete: if false; // Immutable financial ledger
+    }
+
+    // 5. Loans
+    match /loans/{loanId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(loanId);
+      allow delete: if false;
+    }
+
+    // 6. Loan Payments
+    match /loan_payments/{paymentId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(paymentId);
+      allow delete: if false;
+    }
+
+    // 7. Member Withdrawals
+    match /member_withdrawals/{withdrawalId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isValidId(withdrawalId) && isValidWithdrawal(incoming());
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // 8. Official Receipts
+    match /receipts/{receiptId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(receiptId) && isValidReceipt(incoming());
+      allow delete: if false;
+    }
+
+    // 9. Society Rules & Regulations
+    match /rules/{ruleId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && isValidId(ruleId);
+    }
+
+    // 10. General Meetings & Attendance
+    match /meetings/{meetingId} {
+      allow get, list: if true;
+      allow create, delete: if isAdmin() && isValidId(meetingId);
+      allow update: if isAdmin() || (
+        isSignedIn() && isValidId(meetingId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['attendees'])
+      );
+    }
+
+    // 11. Activity & Security Audit Logs: Append-only ledger
+    match /activity_logs/{logId} {
+      allow get, list: if isAdmin();
+      allow create: if isSignedIn() && isValidId(logId) && isValidLog(incoming());
+      allow update, delete: if false; // Tamper-evident: once written, logs cannot be modified or erased
+    }
+
+    // 12. Income Records
+    match /incomes/{incomeId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && isValidId(incomeId);
+    }
+
+    // 13. Expense Records
+    match /expenses/{expenseId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && isValidId(expenseId);
+    }
+
+    // 14. Profit Distributions
+    match /profit_distributions/{distributionId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(distributionId);
+      allow delete: if false;
+    }
+  }
+}

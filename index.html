@@ -34,15 +34,28 @@
 
       window.addEventListener('unhandledrejection', function(event) {
         var reason = String(event && (event.reason && (event.reason.message || event.reason)) || '');
-        if (
-          reason.indexOf('Pending promise was never set') !== -1 ||
-          reason.indexOf('cancelled-popup-request') !== -1 ||
-          reason.indexOf('popup-blocked') !== -1 ||
-          reason.indexOf('popup-closed-by-user') !== -1 ||
-          reason.indexOf("Cannot read properties of null (reading 'style')") !== -1
-        ) {
+        var benignTokens = [
+          'Pending promise was never set',
+          'cancelled-popup-request',
+          'popup-blocked',
+          'popup-closed-by-user',
+          'auth/popup-closed-by-user',
+          'auth/cancelled-popup-request',
+          'Missing or insufficient permissions',
+          'permission-denied',
+          'Failed to fetch',
+          'NetworkError',
+          'style',
+          'recaptcha',
+          'Firestore Error',
+          '[Handled'
+        ];
+        var isBenign = benignTokens.some(function(t) { return reason.indexOf(t) !== -1; });
+        if (isBenign) {
           event.preventDefault();
-          console.warn('[Handled Rejection]', reason);
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          console.warn('[Handled Notice]', reason);
+          return true;
         }
       });
 

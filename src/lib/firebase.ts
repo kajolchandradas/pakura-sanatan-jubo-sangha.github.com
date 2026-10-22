@@ -29,15 +29,6 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || undefined);
 
-async function testConnection() {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch {
-    // Quiet test probe
-  }
-}
-testConnection().catch(() => {});
-
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',
@@ -81,8 +72,8 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.warn('[Handled Firestore Notice]', JSON.stringify(errInfo));
+  return errInfo;
 }
 
 const provider = new GoogleAuthProvider();

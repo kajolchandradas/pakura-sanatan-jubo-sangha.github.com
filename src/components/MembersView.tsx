@@ -63,6 +63,8 @@ export const MembersView: React.FC<MembersViewProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedMemberIdToDelete, setSelectedMemberIdToDelete] = useState<string>('');
 
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editName, setEditName] = useState('');
@@ -183,13 +185,25 @@ export const MembersView: React.FC<MembersViewProps> = ({
         </div>
 
         {canEdit && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t.addMember}</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => {
+                setSelectedMemberIdToDelete(members[0]?.systemId || '');
+                setShowDeleteModal(true);
+              }}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:hover:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-800 flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+              <span>{language === 'bn' ? 'সদস্য মুছুন' : 'Delete Members'}</span>
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t.addMember}</span>
+            </button>
+          </div>
         )}
       </div>
 

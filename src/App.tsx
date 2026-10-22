@@ -1215,48 +1215,21 @@ export default function App() {
             </div>
           )}
 
-          {/* 2. Members View (Admins only - general members strictly see their own accounts only) */}
+          {/* 2. Members View (Accessible to both Admins and Members) */}
           {!isViewOnly && currentTab === 'members' && (
-            isAdmin ? (
-              <MembersView
-                members={appData.members}
-                contributions={appData.contributions}
-                currentUser={currentUser}
-                language={language}
-                onAddMember={handleAddMember}
-                onUpdateMember={handleUpdateMember}
-                onDeleteMember={handleDeleteMember}
-                onRecordContributionForMember={() => setCurrentTab('contributions')}
-                onViewReceipt={handleViewReceipt}
-                onLoadSampleMembers={handleLoadSampleMembers}
-                onOpenLoginModal={() => setIsLoginModalOpen(true)}
-              />
-            ) : (
-              <MemberDashboardView
-                member={resolvedMemberRecord}
-                linkedMembers={linkedMemberRecords.length > 0 ? linkedMemberRecords : [resolvedMemberRecord]}
-                contributions={appData.contributions}
-                receipts={appData.receipts}
-                withdrawals={appData.memberWithdrawals || []}
-                distributions={appData.profitDistributions || []}
-                maxWithdrawalPercentage={appData.settings.maxWithdrawalPercentage ?? 70}
-                minReserveBalance={appData.settings.minReserveBalance ?? 500}
-                currentUser={currentUser}
-                language={language}
-                onViewReceipt={handleViewReceipt}
-                monthlyAmount={appData.settings.monthlyContributionAmount}
-                dueDay={appData.settings.contributionDueDay}
-                lateFeeAmount={appData.settings.lateFeeAmount}
-                initialTab="overview"
-                rules={appData.rules || []}
-                meetings={appData.meetings || []}
-                onNavigate={setCurrentTab}
-                onExecuteWithdrawal={handleMemberWithdrawal}
-                onRequestWithdrawal={handleRequestWithdrawal}
-                onCancelWithdrawal={handleCancelWithdrawal}
-                onRefreshData={() => setAppData(StorageService.getAppData())}
-              />
-            )
+            <MembersView
+              members={appData.members}
+              contributions={appData.contributions}
+              currentUser={currentUser}
+              language={language}
+              onAddMember={handleAddMember}
+              onUpdateMember={handleUpdateMember}
+              onDeleteMember={handleDeleteMember}
+              onRecordContributionForMember={() => setCurrentTab('contributions')}
+              onViewReceipt={handleViewReceipt}
+              onLoadSampleMembers={handleLoadSampleMembers}
+              onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            />
           )}
 
           {/* 3. Contributions View (Monthly Savings) */}
